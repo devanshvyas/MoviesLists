@@ -23,7 +23,13 @@ class DetailViewController: UIViewController {
     
     var movieId: Int?
     var movieTitle: String?
-    var movieDetails: Details?
+    var movieDetails: Details? {
+        didSet {
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }
+    }
     var cells: [DetailCells] = [.imageCell, .overview, .genres, .duration, .releaseDate, .companies, .budget, .revenue, .languages]
     
     @IBOutlet weak var tableView: UITableView!
