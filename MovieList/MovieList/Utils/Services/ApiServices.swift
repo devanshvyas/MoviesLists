@@ -9,7 +9,6 @@ import UIKit
 
 class ApiServices {
     static let shared = ApiServices()
-    var isShowingIndicator = false
     
     var listingUrl = "https://api.themoviedb.org/3/discover/movie?api_key="
     var detailUrl = "https://api.themoviedb.org/3/movie/%d?api_key="
@@ -18,19 +17,18 @@ class ApiServices {
     
     var apiKey = PlistHelper.shared.getString(forKey: .apiKey) ?? ""
     
-    func getMovieLists(page: Int = 1, complete: @escaping ((BaseModel?) -> ())) {
+    func getMovieLists(page: Int = 1, complete: @escaping ((BaseModel?, Error?) -> ())) {
         guard let url = URL(string: listingUrl + apiKey + "&page=\(page)") else { return }
         let urlReq = URLRequest(url: url)
         let task = URLSession.shared.dataTask(with: urlReq) { (data, response, error) in
-            self.isShowingIndicator = false
-            if let _ = error {
-                complete(nil)
+            if let err = error {
+                complete(nil, err)
             } else if let modelData = data  {
                 do {
                     let baseModel = try JSONDecoder().decode(BaseModel.self, from: modelData)
-                    complete(baseModel)
+                    complete(baseModel, nil)
                 } catch (let error) {
-                    complete(nil)
+                    complete(nil, error as NSError)
                     print(error)
                 }
             }
@@ -39,19 +37,18 @@ class ApiServices {
         task.resume()
     }
     
-    func getMovieDetail(movieId: Int, complete: @escaping ((Details?) -> ())) {
+    func getMovieDetail(movieId: Int, complete: @escaping ((Details?, Error?) -> ())) {
         guard let url = URL(string: detailUrl.replacingOccurrences(of: "%d", with: String(movieId)) + apiKey) else { return }
         let urlReq = URLRequest(url: url)
         let task = URLSession.shared.dataTask(with: urlReq) { (data, response, error) in
-            self.isShowingIndicator = false
-            if let _ = error {
-                complete(nil)
+            if let err = error {
+                complete(nil, err)
             } else if let modelData = data  {
                 do {
                     let details = try JSONDecoder().decode(Details.self, from: modelData)
-                    complete(details)
+                    complete(details, nil)
                 } catch (let error) {
-                    complete(nil)
+                    complete(nil, error)
                     print(error)
                 }
             }

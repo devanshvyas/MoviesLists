@@ -38,9 +38,14 @@ class DetailViewController: UIViewController {
     
     func apiCalling() {
         guard let id = movieId else { return }
-        ApiServices.shared.getMovieDetail(movieId: id) { (details) in
-            guard let movieDetail = details else { return }
-            self.movieDetails = movieDetail
+        ApiServices.shared.getMovieDetail(movieId: id) { (details, error) in
+            if let err = error as NSError?, err.domain == NSURLErrorDomain, err.code == NSURLErrorNotConnectedToInternet {
+                let alert = UIAlertController(title: "Network error", message: "Unable to contact the server", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+            } else if let movieDetail = details {
+                self.movieDetails = movieDetail
+            }
         }
     }
 }

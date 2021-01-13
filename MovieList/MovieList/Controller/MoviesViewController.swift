@@ -30,8 +30,12 @@ class MoviesViewController: UIViewController {
     }
     
     func apiCalling(page: Int = 1) {
-        ApiServices.shared.getMovieLists(page: page) { (baseModel) in
-            if let model = baseModel {
+        ApiServices.shared.getMovieLists(page: page) { (baseModel, error) in
+            if let err = error as NSError?, err.domain == NSURLErrorDomain, err.code == NSURLErrorNotConnectedToInternet {
+                let alert = UIAlertController(title: "Network error", message: "Unable to contact the server", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+            } else if let model = baseModel {
                 self.baseModel = model
                 self.listingData.append(contentsOf: baseModel?.results ?? [])
             }
